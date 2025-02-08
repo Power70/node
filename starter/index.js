@@ -44,16 +44,38 @@ const url = require("url");
 
 // 1. Create a server: It accepte a callback function with two parameters request and response.
 
+const tempOverview = fs.readFileSync(`${__dirname}/templates/template-overview.html`, 'utf-8');
+const tempProduct = fs.readFileSync(`${__dirname}/templates/template-product.html`, 'utf-8');
+const tempCard = fs.readFileSync(`${__dirname}/templates/template-card.html`, 'utf-8');
+
 const data = fs.readFileSync(`${__dirname}/dev-data/data.json`, 'utf-8');
+// JSON.parse takes the json code which is a string and automatically turn it into javaScript 
 const dataObj = JSON.parse(data);
 
 const server = http.createServer((req, res) =>{
     // res.end('Hello from the server')
+
     const pathName = req.url;
+
+     // ##### OVERVIEW PAGE ######
+    
     if (pathName == '/'|| pathName == '/overview'){
-        res.end('Overview Page');
+        res.writeHead(200, { 
+            'Content-Type': 'text/html' 
+        });
+        const htmlCard = dataObj.map(el => replaceTemplate(tempCard, el));
+        res.end(tempOverview);
+
+    // ##### PRODUCT PAGE ######
+
     }else if(pathName == '/product'){
-        res.end('Product Page');
+        // specify the content type that is what you are sending to the browser
+        res.writeHead(200, {
+            'content-type':'text/html'
+        })
+        res.end(tempProduct);
+    
+     // ##### API PAGE ######
     }else if(pathName == '/api'){
             // Tell the browser we are sending back json data
             res.writeHead(200, {
@@ -62,9 +84,10 @@ const server = http.createServer((req, res) =>{
             res.end(data);
         // __direname is the directory where the script files are located
 
-        // JSON.parse takes the json code which is a string and automatically turn it into javaScript 
         // res.end('API Page');
     }
+
+     // ##### PAGE NOT FOUND ######
     else{
         res.writeHead(400, {
             'content-type': 'text/html',
