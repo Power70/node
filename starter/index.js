@@ -39,7 +39,21 @@ const url = require("url");
 
 ////////////////////////////////////////////////////////////////
 // SERVER
+const replaceTemplate = (temp, product) =>{
+    // tem parameter here represents each placeholder found int the template-card.html
+    // the replace method accepts two parameters what you want to replace and the replacement item which in this case is the product detail in the dataObject
+    let output = temp.replace(/{%PRODUCTNAME%}/g, product.productName);
+    output = output.replace(/{%IMAGE%}/g, product.image);
+    output = output.replace(/{%PRICE%}/g, product.price);
+    output = output.replace(/{%QUANTITY%}/g, product.quantity);
+    output = output.replace(/{%FROM%}/g, product.from);
+    output = output.replace(/{%NUTRIENTS%}/g, product.nutrients);
+    output = output.replace(/{%DESCRIPTION%}/g, product.description);
+    output = output.replace(/{%ID%}/g, product.id);
+    if(!product.organic)  output = output.replace(/{%NOT_ORGANIC%}/g, 'not-organic');
 
+    return output;
+}
 // In order to use the srver we have to do 2 things: First we create a server and second we start the server
 
 // 1. Create a server: It accepte a callback function with two parameters request and response.
@@ -51,6 +65,7 @@ const tempCard = fs.readFileSync(`${__dirname}/templates/template-card.html`, 'u
 const data = fs.readFileSync(`${__dirname}/dev-data/data.json`, 'utf-8');
 // JSON.parse takes the json code which is a string and automatically turn it into javaScript 
 const dataObj = JSON.parse(data);
+// in dataObject we have array of all the object that is in data.json  
 
 const server = http.createServer((req, res) =>{
     // res.end('Hello from the server')
@@ -63,8 +78,11 @@ const server = http.createServer((req, res) =>{
         res.writeHead(200, { 
             'Content-Type': 'text/html' 
         });
-        const htmlCard = dataObj.map(el => replaceTemplate(tempCard, el));
-        res.end(tempOverview);
+        // loop through the dataObject and replace each placeholder with the actual data from the product
+        const htmlCard = dataObj.map(el => replaceTemplate(tempCard, el)).join('');
+        // replace PRODUCT_CARDS in template-overview.html with htmlcard
+        const output =  tempOverview.replace('{%PRODUCT_CARDS%}', htmlCard)
+        res.end(output);
 
     // ##### PRODUCT PAGE ######
 
