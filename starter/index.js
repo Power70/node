@@ -43,6 +43,10 @@ const url = require("url");
 // In order to use the srver we have to do 2 things: First we create a server and second we start the server
 
 // 1. Create a server: It accepte a callback function with two parameters request and response.
+
+const data = fs.readFileSync(`${__dirname}/dev-data/data.json`, 'utf-8');
+const dataObj = JSON.parse(data);
+
 const server = http.createServer((req, res) =>{
     // res.end('Hello from the server')
     const pathName = req.url;
@@ -50,6 +54,16 @@ const server = http.createServer((req, res) =>{
         res.end('Overview Page');
     }else if(pathName == '/product'){
         res.end('Product Page');
+    }else if(pathName == '/api'){
+            // Tell the browser we are sending back json data
+            res.writeHead(200, {
+                'Content-type': 'application/json'
+            });
+            res.end(data);
+        // __direname is the directory where the script files are located
+
+        // JSON.parse takes the json code which is a string and automatically turn it into javaScript 
+        // res.end('API Page');
     }
     else{
         res.writeHead(400, {
